@@ -1,3 +1,1 @@
-gen_scenario.sh to generate scenarios
-
-run_exp.sh to run experiments
+Repo for "Enabling Sustainable Freight Forwarding Network via Collaborative Games", IJCAI-24 
