@@ -10,7 +10,6 @@ from decimal import Decimal
 import multiprocessing as mp
 from concurrent.futures import ProcessPoolExecutor
 
-
 class Shapley_Calculation:
 
     ### this uses arbitrary precision to compute shapley values
@@ -342,9 +341,11 @@ if __name__ == "__main__":
     # path = "data2/ID_015/" 
     path = arg1 + "/" + arg2 + "/"
 
-    for i in range(10,11):
-        sampling_rate = i/10
-        shap = Shapley_Calculation(path, sampling_rate)
+    shap = Shapley_Calculation(path, sampling_rate=1.0)
+
+    # for i in range(10,11):
+    #     sampling_rate = i/10
+    #     shap = Shapley_Calculation(path, sampling_rate)
 
     
     # sampling_rate = 1.
