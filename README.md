@@ -1,6 +1,6 @@
 ## Enabling Sustainable Freight Forwarding Network via Collaborative Games
 
-Repo for our paper "Enabling Sustainable Freight Forwarding Network via Collaborative Games", IJCAI-24
+Repo for our IJCAI-24 paper "Enabling Sustainable Freight Forwarding Network via Collaborative Games"
 
 Install relevant libraries under ``requirements.txt``
 
