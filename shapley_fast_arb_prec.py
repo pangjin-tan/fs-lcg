@@ -21,15 +21,10 @@ class Shapley_Calculation:
         self.temp_path = path + "temp/"
 
         self.graph = self.gen_graph(self.raw_data_path)
-        print(self.graph)
-        
+        # print(self.graph)        
         self.ff_list = self.gen_ff_list(self.raw_data_path)
-
         self.sampling_rate = sampling_rate
-
         self.v_calc = v_calculator.V_Calculator(self.graph, self.raw_data_path, self.temp_path)
-
-
 
         ### compute shapley values
 
@@ -39,13 +34,13 @@ class Shapley_Calculation:
         self.shapley_df = self.compute_shapley_all_ff_parallel(self.graph, self.v_calc, self.sampling_rate)
         end_time = time.time()
         # end_time = time.process_time()
-        # print("elapsed time:", end_time-start_time)
+        print("elapsed time:", end_time-start_time)
         with open(self.res_path + "fast_shapley_elapsed_time.json", "w") as f:
             json.dump({"elapsed_time": end_time-start_time}, f)
     
         ### compute original ff cost
-        for ff in self.ff_list:
-            print("ff", ff, "cost", self.v_calc.solve_for_ff(ff))
+        # for ff in self.ff_list:
+        #     print("ff", ff, "cost", self.v_calc.solve_for_ff(ff))
 
         # remove rows from shapley_df where shapley_value is 0
         self.shapley_df = self.shapley_df[self.shapley_df["shapley_value"] > 0]
@@ -54,6 +49,7 @@ class Shapley_Calculation:
         self.shapley_df.to_csv(self.res_path + "fast_shapley_values.csv", index=False)
         
 
+
     def compute_shapley_single(self, args):
         graph, v_calc, i, sampling_rate = args
         phi_1_value, phi_1_weight, phi_1_sample_count, phi_1_total_count = self.compute_phi_1(graph, v_calc, i)
@@ -61,9 +57,11 @@ class Shapley_Calculation:
         shapley_value = float((phi_1_value + phi_2_value) / (phi_1_weight + phi_2_weight))
         return shapley_value
 
-    def compute_shapley_all_ff_parallel(self, graph, v_calc, sampling_rate):
-        ### compute shapley value for all forwarders
 
+
+    def compute_shapley_all_ff_parallel(self, graph, v_calc, sampling_rate):
+
+        ### compute shapley value for all forwarders
         pool = mp.Pool()
 
         num_forwarders = len(graph)
@@ -78,12 +76,10 @@ class Shapley_Calculation:
 
         pool.close()
         pool.join()
-
         
         # with ProcessPoolExecutor() as executor:
         #     shapley_values = list(executor.map(self.compute_shapley_single, arg_list))
 
-        
         df = pd.DataFrame({"forwarder": [i for i in range(num_forwarders)], "shapley_value": shapley_values})
         # print("count", phi_1_sample_count, phi_1_total_count, phi_2_sample_count, phi_2_total_count)
 
@@ -91,6 +87,8 @@ class Shapley_Calculation:
         # df.to_csv(self.res_path + "shapley_values.csv", index=False)
         
         return df
+    
+
 
     def compute_shapley_all_ff(self, graph, v_calc, sampling_rate):
 
@@ -173,6 +171,7 @@ class Shapley_Calculation:
 
 
     def gen_induced_subgraphs(self, g, vertex_set):
+        
         ### gen induced subgraphs that contain vertex_set
         queue = [vertex_set]
         subgraphs = []
@@ -290,6 +289,7 @@ class Shapley_Calculation:
         return g_prime        
 
     
+
     def compute_shapley_naive(self, ff_list):
 
         # init shapley values
@@ -319,49 +319,10 @@ class Shapley_Calculation:
 
 if __name__ == "__main__":
 
-    # g = [[2,4],
-    #     [2,3],
-    #     [0,1,3],
-    #     [1,2],
-    #     [0,5,6,7],
-    #     [4],
-    #     [4,8],
-    #     [4],
-    #     [6]]
-
-    # we sample subgraphs (at different rates)  rather than compute v-function for induced subgraphs of node and neighbours
-
-    # example cmd: python shapley_fast_arb_prec.py data2 ID_001
-
     import sys
     script_name = sys.argv[0]
     arg1 = sys.argv[1]  # data2
     arg2 = sys.argv[2]  # ID_001
 
-    # path = "data2/ID_015/" 
     path = arg1 + "/" + arg2 + "/"
-
     shap = Shapley_Calculation(path, sampling_rate=1.0)
-
-    # for i in range(10,11):
-    #     sampling_rate = i/10
-    #     shap = Shapley_Calculation(path, sampling_rate)
-
-    
-    # sampling_rate = 1.
-    # start_time = time.time()
-    # shap = Shapley_Calculation(path, sampling_rate)
-    # shap.compute_shapley_naive(shap.graph)
-    # end_time = time.time()
-    # print("elapsed time:", end_time-start_time)
-
-    # ff = 0
-    # phi_1 = shap.compute_phi_1(shap.graph, shap.v_calc, ff)
-    # phi_2 = shap.compute_phi_2(shap.graph, shap.v_calc, ff)
-    # print(phi_1+phi_2)
-
-    # print(phi_1, phi_2, phi_1+phi_2)
-    # print(math.factorial(len(g)))
-
-    # print(shap.remove_vertices(g, [0,2], [2,4]))
-    # shap.compute_phi_2(g, 0)

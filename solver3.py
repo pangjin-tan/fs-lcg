@@ -65,18 +65,17 @@ class Model:
         for shipment in shipments:
             model += lpSum([y[shipment, sailing, box] for sailing in feasible_sailings[shipment] for box in range(sailing_data[sailing]['boxes'])]) == 1
 
-        
         # add constraint: total volume of shipments assigned to a sailing-box is less than or equal to the sailing-box's capacity (in cbm)
         for sailing in sailings:
             for box in range(sailing_data[sailing]['boxes']):
                 model += lpSum([y[shipment, sailing, box] * shipment_data[shipment]['cbm'] for shipment in feasible_shipments[sailing]]) <= v_max * z[sailing, box]
 
-        # print(model)
-        
+        # print(model)        
         # model.writeLP("model.lp")
 
         # solve the model
-        solver = CPLEX_CMD(msg=0, options=['set timelimit 60'])
+        # solver = CPLEX_CMD(msg=0, options=['set timelimit 60'])
+        solver = PULP_CBC_CMD(msg=0)
         status = model.solve(solver)
 
         # get solution
@@ -89,10 +88,8 @@ class Model:
 
 
 
-
     # greedily assign shipments to sailing-boxes
     def get_bound(self, sailing_data, shipment_data, sailings, shipments, feasible_sailings, feasible_shipments, v_max, y_ones):
-
         
         def fill_box(sailing_vol, sailing, cbm):
             for i in range(sailing_data[sailing]['boxes']):
@@ -108,13 +105,11 @@ class Model:
                 if sailing_data[s]['cost'] > curr_cost and sailing_data[s]['cost'] < lowest:
                     lowest, next_sailing = sailing_data[s]['cost'], s
             return next_sailing
-
         
         # intialize sailing_vol
         sailing_vol = {}
         for sailing in sailings:
             sailing_vol[sailing] = [0] * sailing_data[sailing]['boxes']
-        
         
         shipments =[(y[0], y[1], shipment_data[y[0]]["cbm"]) for y in y_ones]
         shipments.sort(key=lambda x: x[2], reverse=True)
@@ -141,13 +136,12 @@ class Model:
     # adjust the box capacity in the data itself
     def update(self, old_sailing_data, shipment_data, assignment_data, box_count):
 
-        # udpate box count and remove sailings with no boxes
+        # update box count and remove sailings with no boxes
         sailing_data = {}
         for sailing in old_sailing_data:
             if box_count.get(sailing, 0) > 0:
                 sailing_data[sailing] = old_sailing_data[sailing]
                 sailing_data[sailing]['boxes'] = box_count[sailing]
-
 
         sailings = list(sailing_data.keys())
         shipments = list(shipment_data.keys())        
@@ -181,8 +175,10 @@ class Model:
 
 
     def init_asgn(self, assignment_data, sailing_data):
+
         asgn = {}
         y_ones = []
+
         # assign each request to the cheapest sailing
         for _, data in assignment_data.items():
             request = data['request']
@@ -227,34 +223,3 @@ class Model:
                                    self.v_max)
 
 
-########################################
-
-
-if __name__ == "__main__":
-
-    # remove clone*.log files
-    for f in glob.glob("clone*.log"):
-        os.remove(f)
-
-    # read arguments
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--method', type=str, default='exact')
-    parser.add_argument('--id', type=int)
-    args = parser.parse_args()
-    method = args.method
-    id = args.id
-
-    # read data2
-    path = "data2/ID_001/temp/"
-    sailing_data = pd.read_csv(f'{path}sailing_data_{id}.csv')
-    shipment_data = pd.read_csv(f'{path}shipment_data_{id}.csv')
-    assignment_data = pd.read_csv(f'{path}assignment_data_{id}.csv')
-
-    model = Model(sailing_data, shipment_data, assignment_data)
-
-    start_time = time.time()
-    model.solve(method)
-    print("Elapsed time:", time.time() - start_time)
-
-
-########################################

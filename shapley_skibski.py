@@ -12,7 +12,6 @@ from concurrent.futures import ThreadPoolExecutor
 
 class Shapley_Calculation:
 
-
     def __init__(self, path) -> None:
         
         self.raw_data_path = path + "raw/"
@@ -40,8 +39,9 @@ class Shapley_Calculation:
         with open(self.log_path + "skibski_shapley_elapsed_time.json", "w") as f:
             json.dump({"elapsed_time": end_time-start_time}, f)
         
-        # print(shapley_df)
+        print(shapley_df)
         shapley_df.to_csv(self.log_path + "skibski_shapley.csv", index=False, header=True)
+
 
 
     def gen_ff_list(self, path):
@@ -62,6 +62,7 @@ class Shapley_Calculation:
         print("ff_list", ff_list)
 
         return ff_list
+
 
     
     def gen_graph(self, path):
@@ -96,7 +97,6 @@ class Shapley_Calculation:
                         graph[w].append(v)
         
         # print("graph", graph)
-
         return graph
 
 
@@ -132,8 +132,8 @@ class Shapley_Calculation:
             id = self.idx_map[w][v] + 1
             self.expand_subgraph(path, subgraph, forbidden, id)
         else:
-            # print(subgraph)
             self.dfs_ind_subgraphs.append(subgraph)
+
 
 
     def gen_dfs_ind_subgraphs(self):
@@ -142,16 +142,16 @@ class Shapley_Calculation:
         for i in self.ff_list:
             self.expand_subgraph([i], [i], forbids, 0)
             forbids = forbids + [i]       
-        
-        # for i in range(1, 1+self.max_forwarders):
-        #     self.expand_subgraph([i], [i], forbids, 0)
-        #     forbids = forbids + [i]
     
+
 
     def dfs_myerson_wrapper(self, args):
         return self.dfs_myerson(*args)
     
+
+
     def dfs_myerson(self, path, subgraph, forbidden_, idx, neighbours_):
+
         # path, subgraph, forbidden_, idx, neighbours_ = args
         forbidden = forbidden_.copy()
         neighbours = neighbours_.copy()
@@ -178,11 +178,7 @@ class Shapley_Calculation:
             self.dfs_ind_subgraphs.append(subgraph)
             c = len(subgraph)
             n = len(neighbours)
-            # str_forwarders = ",".join([str(x) for x in sorted(subgraph)])
             f = self.v_calc.solve_specific_coalition(subgraph)
-            # f = self.opt_sol_dict[str_forwarders]
-
-            # f = 1
 
             # print("subgraph:", subgraph)
             # print("neighbours:", neighbours)
@@ -198,8 +194,6 @@ class Shapley_Calculation:
         self.myerson_dict = {}
         for v in self.ff_list:
             self.myerson_dict[v] = 0
-        # for v in range(1, 1+self.max_forwarders):
-        #     self.myerson_dict[v] = 0
 
         args_list = []
         forbids=[] 
@@ -210,13 +204,13 @@ class Shapley_Calculation:
             forbids = forbids + [i]
         
         
-        # for args in args_list:
-            # self.dfs_myerson_wrapper(args)
+        for args in args_list:
+            self.dfs_myerson_wrapper(args)
         
-        pool = mp.Pool(mp.cpu_count())
-        pool.map(self.dfs_myerson_wrapper, args_list)
-        pool.close()
-        pool.join()
+        # pool = mp.Pool(mp.cpu_count())
+        # pool.map(self.dfs_myerson_wrapper, args_list)
+        # pool.close()
+        # pool.join()
 
 
         k = list(self.myerson_dict.keys())

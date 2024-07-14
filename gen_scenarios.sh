@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# set a varaible called dir
 dir="data"
 
 # cp -r data12/ID_000 $dir/ID_000

@@ -30,10 +30,6 @@ class V_Calculator:
         for i in range(self.num_groups):
             self.all_sailings.append(pd.read_csv(self.path + "sailing_data_" + str(i) + ".csv"))
             self.all_shipments.append(pd.read_csv(self.path + "shipment_data_" + str(i) + ".csv"))
-        
-        # for i in range(self.num_groups):
-        #     print(all_sailings[i])
-        #     print(all_sailings[i])
 
 
 
@@ -52,23 +48,6 @@ class V_Calculator:
             total_cost += obj
             
         return total_cost
-
-
-    # def solve_scenario(self, groups, sailing_data_list, shipment_data_list, assignment_data_list):
-
-    #     ### solve the scenario given in the temp_path
-    #     total_cost = 0
-    #     for group in groups:
-    #         sailing_data = pd.read_csv(self.temp_path + "sailing_data_" + str(group) + ".csv")
-    #         shipment_data = pd.read_csv(self.temp_path + "shipment_data_" + str(group) + ".csv")
-    #         assignment_data = pd.read_csv(self.temp_path + "assignment_data_" + str(group) + ".csv")
-
-    #         model = solver3.Model(sailing_data, shipment_data, assignment_data)
-    #         method = "two_steps"
-    #         obj = model.solve(method)
-    #         total_cost += obj
-            
-    #     return total_cost
 
 
 
@@ -97,11 +76,6 @@ class V_Calculator:
         for i, df in enumerate(ff_shipments):
             ff_assignments.append(pd.DataFrame({'request': df['request'], 'sailing': 0, 'ff': ff}))
 
-        ### delete all files in temp path
-        # file_list = os.listdir(self.temp_path)
-        # for f in file_list:
-        #     os.remove(self.temp_path + f)
-
         ### export to temp path as csv
         ff_sailings_list = {}
         ff_shipments_list = {}
@@ -118,10 +92,10 @@ class V_Calculator:
             ff_shipments_list[i] = ff_shipments[i].reset_index(drop=True)
             ff_assignments_list[i] = ff_assignments[i].reset_index(drop=True)
         
-
         ff_cost = self.solve_scenario(req_groups, ff_sailings_list, ff_shipments_list, ff_assignments_list)
 
         return ff_cost
+
 
 
     # take a coalition and compute its v-function
@@ -163,7 +137,6 @@ class V_Calculator:
             assignment_df = pd.DataFrame(list(itertools.product(request_df, sailing_df)), columns=['request', 'sailing'])
             coalition_assignments.append(assignment_df)
 
-
         ### delete all files in temp path
         # file_list = os.listdir(self.temp_path)
         # for f in file_list:
@@ -189,85 +162,13 @@ class V_Calculator:
 
 
 
-        
-    # def solve_for_coalition_deprecated(self, coalition, forwarder, with_ff):
-
-    #     coalition_sailings = []
-    #     coalition_shipments = []
-    #     coalition_assignments = []
-
-    #     ### extract rows from dataframes where forwarder and one of ff is in coalition 
-    #     req_groups = []
-    #     for i in range(self.num_groups):
-    #         ff_values = list(self.all_sailings[i]['ff'])
-    #         if forwarder in ff_values: # look for sailing_data[i] where forwarder is in ff column
-    #             if with_ff==True:
-    #                 common_coalition = list(set(coalition).intersection(ff_values)) + [forwarder]
-    #             else:
-    #                 common_coalition = list(set(coalition).intersection(ff_values))
-    #             if (with_ff==True and len(common_coalition) > 1) or (with_ff==False and len(common_coalition) > 0):
-    #                 req_groups.append(i)
-    #                 coalition_sailings.append(self.all_sailings[i][self.all_sailings[i]['ff'].isin(common_coalition)])
-    #                 coalition_shipments.append(self.all_shipments[i][self.all_shipments[i]['ff'].isin(common_coalition)])
-        
-    #     ### if there is no data for req_groups, return solve_for_ff
-    #     if len(req_groups) == 0 and with_ff == True:
-    #         return self.solve_for_ff(forwarder)
-    #     elif len(req_groups) == 0 and with_ff == False:
-    #         return 0
-        
-        
-    #     ### replace the first column of shipment_data dataframe with running numbers
-    #     for i, df in enumerate(coalition_shipments):
-    #         df.reset_index(drop=True, inplace=True)
-    #         df['request'] = df.index
-        
-
-    #     ### replace the first column of sailing_data dataframe with running numbers
-    #     for i, df in enumerate(coalition_sailings):
-    #         df.reset_index(drop=True, inplace=True)
-    #         df['sailing'] = df.index
-        
-
-    #     ### generate assignment_data frame with columns request, sailing
-    #     ### each assignment_data[i] is an outerjoin of sailings_data[i] sailing column and shipments_data[i] request columnn
-    #     for i, df in enumerate(coalition_shipments):
-    #         request_df = df['request']
-    #         sailing_df = coalition_sailings[i]['sailing']
-    #         assignment_df = pd.DataFrame(list(itertools.product(request_df, sailing_df)), columns=['request', 'sailing'])
-    #         coalition_assignments.append(assignment_df)
-
-
-
-    #     ### delete all files in temp path
-    #     # file_list = os.listdir(self.temp_path)
-    #     # for f in file_list:
-    #         # os.remove(self.temp_path + f)
-
-    #     coalition_sailings_list = {}
-    #     coalition_shipments_list = {}
-    #     coalition_assignments_list = {}
-
-    #     ### export to temp path as csv
-    #     for i in range(len(coalition_sailings)):
-    #         group = req_groups[i]
-    #         # coalition_sailings[i].to_csv(self.temp_path + "sailing_data_" + str(group) + ".csv", index=False)
-    #         # coalition_shipments[i].to_csv(self.temp_path + "shipment_data_" + str(group) + ".csv", index=False)
-    #         # coalition_assignments[i].to_csv(self.temp_path + "assignment_data_" + str(group) + ".csv", index=False)
-    #         coalition_assignments_list[group] = coalition_assignments[i]
-    #         coalition_sailings_list[group] = coalition_sailings[i]
-    #         coalition_shipments_list[group] = coalition_shipments[i]
-
-    #     coalition_cost = self.solve_scenario(req_groups, coalition_sailings_list, coalition_shipments_list, coalition_assignments_list)
-
-    #     return coalition_cost
-
-
     def calc_marginal_contribution(self, subcoalition, agent):
         # compute marginal contribution of agent to subgraph
         cost_with_ff = self.solve_specific_coalition(list(subcoalition) + [agent])
         cost_without_ff = self.solve_specific_coalition(list(subcoalition))
         return cost_with_ff - cost_without_ff
+
+
 
     def calc_marginal_contribution_deprecated(self, subcoalition, agent):
         # deprecated
@@ -276,37 +177,3 @@ class V_Calculator:
         cost_without_ff = self.solve_for_coalition(subcoalition, agent, with_ff=False)
         return cost_with_ff - cost_without_ff
     
-
-
-
-
-if __name__ == "__main__":
-    
-    # g = [[2,4],
-    #     [2,3],
-    #     [0,1,3],
-    #     [1,2],
-    #     [0,5,6,7],
-    #     [4],
-    #     [4,
-    #     [4],
-    #     [6]]
-    
-    # g = [[8], [], [], [6, 23, 8], [], [], [3, 15, 7], [15, 6], [23, 3, 0], [], [], [], [], [], [], [7, 6], [], [], [], [], [], [], [], [3, 8]]
-
-    # c = [0,1,2,3]
-
-    path = "data2/ID_007/"
-
-    g = [[], [], [6], [4], [3], [], [2]]
-
-    vc = V_Calculator(g, raw_data_path = path + "raw/", temp_path = path+"temp/")
-
-    # ff_cost = vc.solve_for_ff(0)
-    # print(ff_cost)
-
-    # marginal_contrib = vc.calc_marginal_contribution([2], 6)
-    # print("marginal contrib",marginal_contrib)
-
-    # coalition_cost = vc.solve_specific_coalition([5,3])
-    # print("coalition cost", coalition_cost)

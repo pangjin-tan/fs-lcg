@@ -125,9 +125,7 @@ class Remove_FF:
                 ### generate assignment data and export to csv    
                 assignment_data_df = self.gen_assignment_data(shipment_data_df, sailings)
                 assignment_data_df.to_csv(path + assignment_data_prefix + index + ".csv", index=False)
-                
-
-
+            
 
 
     def dump_data(self, data, output_path, file_name):

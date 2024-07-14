@@ -21,6 +21,8 @@ def gen_network(file_path, nx_type="long-tailed", num_forwarders=10, seed=1):
 
     return ffs, edges
 
+
+
 def gen_service_to_edge_dict(ffs, edges, num_services=20):
     # num_services = 20
     # create a service for each edge
@@ -48,21 +50,6 @@ def gen_service_to_edge_dict(ffs, edges, num_services=20):
             edge_to_service_dict[random.choice(edges)] += [i]
 
         
-    # ff_services = []
-    # for i in range(len(ffs)):
-    #     ff_services += [[]]
-    # # map services to forwarders
-    # for edge, services in edge_to_service_dict.items():
-    #     for service in services:
-    #         if service not in ff_services[edge[0]]:
-    #             ff_services[edge[0]] += [service]
-    #         if service not in ff_services[edge[1]]:
-    #             ff_services[edge[1]] += [service]
-    # #sort services
-    # for i in range(len(ff_services)):
-    #     ff_services[i] = sorted(ff_services[i])
-
-    # print(ff_services)
 
     service_to_edge_dict = {}
     for edge, services in edge_to_service_dict.items():
@@ -73,6 +60,7 @@ def gen_service_to_edge_dict(ffs, edges, num_services=20):
                 service_to_edge_dict[service] += [edge]
     
     return service_to_edge_dict
+
 
 
 def gen_data_for_service(service_to_edge_dict, service, max_num_shipments=5, 
@@ -117,6 +105,7 @@ def gen_data_for_service(service_to_edge_dict, service, max_num_shipments=5,
     return shipments, sailings, assignments    
     
 
+
 def gen_data_for_all_services(path, service_to_edge_dict, max_num_shipments=5, 
                          min_cost = 800, max_cost=1200, 
                          min_box = 5, max_box = 10):
@@ -137,11 +126,11 @@ def gen_data_for_all_services(path, service_to_edge_dict, max_num_shipments=5,
     return
 
 
+
 if __name__ == "__main__":
 
-    # python gen_networks.py data4 ID_021 small-world 10
-    # note that average degree is hardcoded to 5 in this case
-
+    # python gen_networks.py $dir ID_005 small-world 50
+    
     data_dir = sys.argv[1]
     data_id = sys.argv[2]
     nx_type = sys.argv[3]
